@@ -1,5 +1,8 @@
 const fs = require("fs");
 const http = require("http");
+const url = require("url");
+const replaceTemplate = require("./modules/replaceTemplate");
+const slugify = require("slugify");
 
 // const textIn = fs.readFileSync("./txt/input.txt", "utf8");
 
@@ -56,21 +59,6 @@ const http = require("http");
 //   const productData = JSON.parse(data);
 // });
 
-const replaceTemplate = (tempProduct, ele) => {
-  let output = tempProduct.replace(/{%PRODUCTNAME%}/g, ele.productName);
-  output.replace(/{%IMAGE%}/g, ele.image);
-  output.replace(/{%QUANTITY%}/g, ele.quantity);
-  output.replace(/{%PRICE%}/g, ele.price);
-  output.replace(/{%FROM%}/g, ele.from);
-  output.replace(/{%NUTRIENTS%}/g, ele.nutrients);
-  output.replace(/{%DESCRIPTION%}/g, ele.description);
-  output.replace(/{%ID%}/g, ele.id);
-  if (!ele.organic) {
-    output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
-  }
-  return output;
-};
-
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 
 const tempOverview = fs.readFileSync(
@@ -87,32 +75,45 @@ const tempProduct = fs.readFileSync(
 );
 
 const dataObject = JSON.parse(data);
-console.log(dataObject);
 
 const server = http.createServer((req, res) => {
-  const pathName = req.url;
+  // const pathName = req.url;
+  const { pathname, query } = url.parse(req.url, true);
   //OVERVIEW PAGE
-  if (pathName === "/overview" || pathName === "/") {
+  if (pathname === "/overview" || pathname === "/") {
     res.writeHead(200, {
       "content-type": "text/html",
     });
 
     const cardsHtml = dataObject
       .map(function (ele) {
-        return replaceTemplate(tempProduct, ele);
+        return replaceTemplate(tempCard, ele);
       })
       .join(" ");
-    console.log(cardsHtml);
     const output = tempOverview.replace("{%PRODUCT_CARDS%}", cardsHtml);
 
     res.end(output);
   }
   //PRODUCT PAGE
-  else if (pathName === "/product") {
-    res.end("product");
+  else if (pathname === "/product") {
+    const product = dataObject[query.id];
+    let finalProduct = tempProduct
+      .replace(/{%IMAGE%}/g, product.image)
+      .replace(/{%FROM%}/g, product.from)
+      .replace(/{%NUTRIENTS%}/g, product.nutrients)
+      .replace(/{%QUANTITY%}/g, product.quantity)
+      .replace(/{%PRICE%}/g, product.price)
+      .replace(/{%DESCRIPTION%}/g, product.description)
+      .replace(/{%PRODUCTNAME%}/g, product.productName);
+
+    if (!product.organic) {
+      finalProduct = finalProduct.replace(/{%NOT_ORGANIC%}/g, "not-organic");
+    }
+
+    res.end(finalProduct);
   }
   //API PAGE
-  else if (pathName === "/api") {
+  else if (pathname === "/api") {
     res.writeHead(200, {
       "content-type": "application/json",
     });

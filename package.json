@@ -1,0 +1,25 @@
+{
+  "name": "mern-stack",
+  "version": "1.0.0",
+  "description": "learning mern stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sepehrsdgh/MERN-STACK.git"
+  },
+  "author": "sepehr maarefi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sepehrsdgh/MERN-STACK/issues"
+  },
+  "homepage": "https://github.com/sepehrsdgh/MERN-STACK#readme",
+  "dependencies": {
+    "slugify": "^1.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
